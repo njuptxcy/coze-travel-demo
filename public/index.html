@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Coze Chat SDK Demo</title>
+    <style>
+      :root {
+        --bg: #efe5d6;
+        --panel: rgba(255, 249, 241, 0.88);
+        --line: #d3c1a4;
+        --text: #2d2418;
+        --muted: #74614a;
+        --accent: #9d531c;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: "Segoe UI", "PingFang SC", "Hiragino Sans GB", sans-serif;
+        color: var(--text);
+        background:
+          radial-gradient(circle at top left, rgba(255, 251, 238, 0.9) 0, transparent 26%),
+          linear-gradient(180deg, #eadcc7 0%, var(--bg) 42%, #ece4d7 100%);
+      }
+
+      .shell {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 28px;
+      }
+
+      .hero {
+        background: var(--panel);
+        border: 1px solid rgba(211, 193, 164, 0.8);
+        border-radius: 28px;
+        padding: 28px 30px;
+        box-shadow: 0 18px 40px rgba(78, 51, 17, 0.08);
+      }
+
+      .eyebrow {
+        margin: 0 0 10px;
+        font-size: 12px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--accent);
+      }
+
+      h1 {
+        margin: 0 0 10px;
+        font-size: 34px;
+      }
+
+      .desc,
+      .tips {
+        margin: 0;
+        max-width: 760px;
+        line-height: 1.7;
+        color: var(--muted);
+      }
+
+      .tips {
+        margin-top: 12px;
+        font-size: 14px;
+      }
+
+      .sdk-wrap {
+        margin-top: 22px;
+        min-height: 720px;
+        border-radius: 24px;
+        border: 1px solid rgba(211, 193, 164, 0.8);
+        overflow: hidden;
+        background: rgba(255, 250, 243, 0.72);
+      }
+
+      #coze-chat-sdk {
+        width: 100%;
+        min-height: 720px;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="shell">
+      <section class="hero">
+        <p class="eyebrow">Coze Chat SDK</p>
+        <h1>商旅费控智能体</h1>
+        <p class="desc">
+          这个页面不再使用昨天那套手写聊天框，而是直接嵌入 Coze 官方 Chat SDK。
+          这样做的目的，是尽量保留 Coze 官方页面对卡片、中间态、交互流程的支持。
+        </p>
+        <p class="tips">
+          当前是学习用 Demo，页面里直接放了前端 token。正式项目不能这样做，后面应改成更安全的鉴权方案。
+        </p>
+      </section>
+
+      <section class="sdk-wrap">
+        <div id="coze-chat-sdk"></div>
+      </section>
+    </main>
+
+    <script src="https://lf-cdn.coze.cn/obj/unpkg/flow-platform/chat-app-sdk/1.2.0-beta.19/libs/cn/index.js"></script>
+    <script>
+      const mountEl = document.getElementById("coze-chat-sdk");
+      const sdk = window.CozeWebSDK || window.CozeWebSDKmain;
+
+      if (!sdk || !sdk.WebChatClient) {
+        mountEl.innerHTML =
+          '<div style="padding:24px;color:#8b4b15;">Chat SDK 加载失败。请打开浏览器控制台检查脚本是否被拦截。</div>';
+        throw new Error("Coze Chat SDK is not available on window.");
+      }
+
+      const chatClient = new sdk.WebChatClient({
+        config: {
+          bot_id: "7622561335737532470",
+        },
+        componentProps: {
+          title: "商旅费控智能体",
+        },
+        auth: {
+          type: "token",
+          token: "pat_orpMRBmtF3AxM0MemoyRUUiIF4BoN1qVmvRyoKAlOcd4Ci3c0jpv9pE5JnT82H1c",
+          onRefreshToken: function () {
+            return "pat_orpMRBmtF3AxM0MemoyRUUiIF4BoN1qVmvRyoKAlOcd4Ci3c0jpv9pE5JnT82H1c";
+          },
+        },
+        el: mountEl,
+      });
+
+      if (chatClient && typeof chatClient.showChatBot === "function") {
+        chatClient.showChatBot();
+      }
+    </script>
+  </body>
+  </html>
