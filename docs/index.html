@@ -3,112 +3,733 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Coze Chat SDK Demo</title>
+    <title>商旅费控智能体 Demo</title>
     <style>
       :root {
-        --bg: #efe5d6;
-        --panel: rgba(255, 249, 241, 0.88);
-        --line: #d3c1a4;
-        --text: #2d2418;
-        --muted: #74614a;
-        --accent: #9d531c;
+        --paper: #f7f2e8;
+        --ink: #1f2330;
+        --muted: #5f6675;
+        --line: rgba(28, 31, 39, 0.12);
+        --card: rgba(255, 252, 246, 0.84);
+        --accent: #b85c38;
+        --accent-deep: #8e3f1e;
+        --teal: #2d726f;
+        --shadow: 0 24px 70px rgba(25, 30, 40, 0.12);
+        --radius-xl: 32px;
+        --radius-lg: 24px;
+        --radius-md: 18px;
       }
 
       * {
         box-sizing: border-box;
       }
 
+      html {
+        scroll-behavior: smooth;
+      }
+
       body {
         margin: 0;
         min-height: 100vh;
-        font-family: "Segoe UI", "PingFang SC", "Hiragino Sans GB", sans-serif;
-        color: var(--text);
+        color: var(--ink);
+        font-family: "Noto Serif SC", "Source Han Serif SC", "PingFang SC", serif;
         background:
-          radial-gradient(circle at top left, rgba(255, 251, 238, 0.9) 0, transparent 26%),
-          linear-gradient(180deg, #eadcc7 0%, var(--bg) 42%, #ece4d7 100%);
+          radial-gradient(circle at 0% 0%, rgba(184, 92, 56, 0.18), transparent 28%),
+          radial-gradient(circle at 100% 20%, rgba(45, 114, 111, 0.16), transparent 26%),
+          linear-gradient(180deg, #efe7da 0%, #f7f2e8 46%, #f2ebdf 100%);
       }
 
-      .shell {
-        max-width: 1180px;
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        opacity: 0.35;
+        background-image:
+          linear-gradient(rgba(40, 41, 46, 0.03) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(40, 41, 46, 0.03) 1px, transparent 1px);
+        background-size: 32px 32px;
+      }
+
+      .page {
+        position: relative;
+        max-width: 1280px;
         margin: 0 auto;
-        padding: 28px;
+        padding: 28px 24px 96px;
       }
 
       .hero {
-        background: var(--panel);
-        border: 1px solid rgba(211, 193, 164, 0.8);
-        border-radius: 28px;
-        padding: 28px 30px;
-        box-shadow: 0 18px 40px rgba(78, 51, 17, 0.08);
+        position: relative;
+        overflow: hidden;
+        display: grid;
+        grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
+        gap: 28px;
+        padding: 32px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius-xl);
+        background: linear-gradient(135deg, rgba(255, 250, 243, 0.92), rgba(248, 239, 225, 0.78));
+        box-shadow: var(--shadow);
+      }
+
+      .hero::after {
+        content: "";
+        position: absolute;
+        width: 280px;
+        height: 280px;
+        right: -80px;
+        top: -110px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(184, 92, 56, 0.22), transparent 70%);
       }
 
       .eyebrow {
-        margin: 0 0 10px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0 0 14px;
+        padding: 8px 12px;
+        border-radius: 999px;
+        border: 1px solid rgba(184, 92, 56, 0.18);
+        background: rgba(255, 246, 238, 0.95);
+        color: var(--accent-deep);
         font-size: 12px;
-        letter-spacing: 0.14em;
+        letter-spacing: 0.12em;
         text-transform: uppercase;
-        color: var(--accent);
+      }
+
+      .eyebrow::before {
+        content: "";
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--accent);
       }
 
       h1 {
-        margin: 0 0 10px;
-        font-size: 34px;
-      }
-
-      .desc,
-      .tips {
         margin: 0;
-        max-width: 760px;
-        line-height: 1.7;
-        color: var(--muted);
+        font-size: clamp(32px, 5vw, 58px);
+        line-height: 1.05;
+        letter-spacing: -0.03em;
       }
 
-      .tips {
-        margin-top: 12px;
+      .hero p {
+        margin: 0;
+      }
+
+      .lead {
+        margin-top: 18px;
+        max-width: 720px;
+        color: var(--muted);
+        font-size: 16px;
+        line-height: 1.85;
+      }
+
+      .hero-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 24px;
+      }
+
+      .hero-actions a,
+      .hero-actions button {
+        appearance: none;
+        border: 0;
+        cursor: pointer;
+        padding: 12px 18px;
+        border-radius: 999px;
+        font: inherit;
+        text-decoration: none;
+        transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
+      }
+
+      .hero-actions a:hover,
+      .hero-actions button:hover {
+        transform: translateY(-1px);
+      }
+
+      .primary {
+        background: linear-gradient(135deg, var(--accent), #d67b53);
+        color: #fff;
+        box-shadow: 0 14px 26px rgba(184, 92, 56, 0.24);
+      }
+
+      .secondary {
+        background: rgba(255, 251, 246, 0.95);
+        color: var(--ink);
+        border: 1px solid var(--line);
+      }
+
+      .hero-side {
+        position: relative;
+        align-self: stretch;
+        display: grid;
+        gap: 14px;
+      }
+
+      .stat-card,
+      .info-card,
+      .note-card {
+        position: relative;
+        border: 1px solid var(--line);
+        border-radius: var(--radius-lg);
+        background: var(--card);
+        backdrop-filter: blur(10px);
+      }
+
+      .stat-card {
+        display: grid;
+        gap: 12px;
+        padding: 20px;
+      }
+
+      .stat-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .stat {
+        padding: 14px;
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.54);
+      }
+
+      .stat strong {
+        display: block;
+        font-size: 22px;
+        font-weight: 700;
+      }
+
+      .stat span {
+        display: block;
+        margin-top: 6px;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.5;
+      }
+
+      .hero-side .title {
+        font-size: 13px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--accent-deep);
+      }
+
+      .hero-side .body {
+        color: var(--muted);
+        line-height: 1.7;
         font-size: 14px;
       }
 
-      .sdk-wrap {
-        margin-top: 22px;
-        min-height: 720px;
-        border-radius: 24px;
-        border: 1px solid rgba(211, 193, 164, 0.8);
+      .main-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 420px;
+        gap: 28px;
+        margin-top: 28px;
+        align-items: start;
+      }
+
+      .content {
+        display: grid;
+        gap: 20px;
+      }
+
+      .panel {
+        border: 1px solid var(--line);
+        border-radius: var(--radius-xl);
+        background: rgba(255, 252, 247, 0.78);
+        box-shadow: var(--shadow);
         overflow: hidden;
-        background: rgba(255, 250, 243, 0.72);
+      }
+
+      .panel-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 20px 22px 0;
+      }
+
+      .panel-title {
+        margin: 0;
+        font-size: 24px;
+      }
+
+      .panel-subtitle {
+        margin: 8px 0 0;
+        color: var(--muted);
+        line-height: 1.7;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        border-radius: 999px;
+        border: 1px solid rgba(45, 114, 111, 0.18);
+        background: rgba(234, 246, 245, 0.92);
+        color: var(--teal);
+        font-size: 12px;
+        white-space: nowrap;
+      }
+
+      .badge::before {
+        content: "";
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--teal);
+      }
+
+      .cards {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+        padding: 22px;
+      }
+
+      .feature {
+        padding: 18px;
+        border-radius: 20px;
+        border: 1px solid rgba(30, 32, 40, 0.08);
+        background: rgba(255, 255, 255, 0.58);
+      }
+
+      .feature h3 {
+        margin: 0 0 8px;
+        font-size: 18px;
+      }
+
+      .feature p {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.7;
+      }
+
+      .architecture {
+        display: grid;
+        gap: 14px;
+        padding: 22px;
+      }
+
+      .arch-item {
+        padding: 18px;
+        border-radius: 20px;
+        border: 1px solid rgba(30, 32, 40, 0.08);
+        background: rgba(255, 255, 255, 0.52);
+      }
+
+      .arch-item h3 {
+        margin: 0 0 8px;
+        font-size: 18px;
+      }
+
+      .arch-item p {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.75;
+      }
+
+      .steps {
+        display: grid;
+        gap: 12px;
+        padding: 22px;
+      }
+
+      .step {
+        display: grid;
+        grid-template-columns: 56px minmax(0, 1fr);
+        gap: 16px;
+        align-items: start;
+        padding: 16px 0;
+        border-top: 1px solid rgba(30, 32, 40, 0.08);
+      }
+
+      .step:first-child {
+        border-top: 0;
+        padding-top: 0;
+      }
+
+      .step-index {
+        display: grid;
+        place-items: center;
+        width: 56px;
+        height: 56px;
+        border-radius: 16px;
+        background: linear-gradient(135deg, rgba(184, 92, 56, 0.14), rgba(45, 114, 111, 0.16));
+        color: var(--accent-deep);
+        font-size: 24px;
+        font-weight: 700;
+      }
+
+      .step h3 {
+        margin: 0 0 6px;
+        font-size: 18px;
+      }
+
+      .step p {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.75;
+      }
+
+      .assistant-area {
+        position: relative;
+        min-height: 780px;
+      }
+
+      .assistant-panel {
+        position: fixed;
+        right: 28px;
+        top: 28px;
+        z-index: 20;
+        width: min(420px, calc(100vw - 32px));
+        border: 1px solid rgba(31, 35, 48, 0.1);
+        border-radius: 28px;
+        overflow: hidden;
+        background: rgba(255, 251, 246, 0.88);
+        box-shadow: 0 28px 60px rgba(20, 24, 33, 0.2);
+        backdrop-filter: blur(14px);
+      }
+
+      .assistant-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 14px 16px;
+        background: linear-gradient(135deg, rgba(255, 247, 238, 0.98), rgba(242, 248, 247, 0.96));
+        border-bottom: 1px solid rgba(31, 35, 48, 0.08);
+        cursor: grab;
+        user-select: none;
+        touch-action: none;
+      }
+
+      .assistant-header.dragging {
+        cursor: grabbing;
+      }
+
+      .assistant-title {
+        display: grid;
+        gap: 2px;
+      }
+
+      .assistant-title strong {
+        font-size: 16px;
+      }
+
+      .assistant-title span {
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .assistant-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .assistant-actions button {
+        appearance: none;
+        border: 1px solid rgba(31, 35, 48, 0.1);
+        background: rgba(255, 255, 255, 0.84);
+        color: var(--ink);
+        padding: 8px 12px;
+        border-radius: 999px;
+        font: inherit;
+        cursor: pointer;
+      }
+
+      .assistant-meta {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 16px;
+        color: var(--muted);
+        font-size: 12px;
+        border-bottom: 1px solid rgba(31, 35, 48, 0.06);
+        background: rgba(255, 255, 255, 0.55);
+      }
+
+      .assistant-meta::before {
+        content: "";
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #2f8a62;
+      }
+
+      .sdk-wrap {
+        height: 720px;
+        background: rgba(255, 252, 248, 0.9);
       }
 
       #coze-chat-sdk {
         width: 100%;
-        min-height: 720px;
+        height: 100%;
+      }
+
+      .footer-note {
+        padding: 18px 22px 22px;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.75;
+      }
+
+      .inline-code {
+        padding: 2px 7px;
+        border-radius: 999px;
+        background: rgba(31, 35, 48, 0.07);
+        font-family: "Consolas", "Courier New", monospace;
+        font-size: 12px;
+      }
+
+      @media (max-width: 1120px) {
+        .hero {
+          grid-template-columns: 1fr;
+        }
+
+        .main-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .assistant-area {
+          min-height: 0;
+        }
+
+        .assistant-panel {
+          position: relative;
+          top: auto;
+          right: auto;
+          width: 100%;
+          max-width: none;
+        }
+      }
+
+      @media (max-width: 720px) {
+        .page {
+          padding: 16px 14px 42px;
+        }
+
+        .hero {
+          padding: 22px 18px;
+          border-radius: 24px;
+        }
+
+        .panel-header {
+          padding: 18px 18px 0;
+          flex-direction: column;
+          align-items: flex-start;
+        }
+
+        .cards {
+          grid-template-columns: 1fr;
+          padding: 18px;
+        }
+
+        .architecture,
+        .steps {
+          padding: 18px;
+        }
+
+        .assistant-header {
+          cursor: default;
+        }
+
+        .sdk-wrap {
+          height: 680px;
+        }
       }
     </style>
   </head>
   <body>
-    <main class="shell">
+    <main class="page">
       <section class="hero">
-        <p class="eyebrow">Coze Chat SDK</p>
-        <h1>商旅费控智能体</h1>
-        <p class="desc">
-          这个页面直接嵌入 Coze 官方 Chat SDK，用来保留 Coze 官方页面对卡片、中间态和交互流程的支持。
-        </p>
-        <p class="tips">
-          当前是学习用 Demo，页面里直接放了前端 token。正式项目不应这样做，后面应改成更安全的鉴权方案。
-        </p>
+        <div>
+          <p class="eyebrow">Coze Travel Demo</p>
+          <h1>企业商旅费控智能体</h1>
+          <p class="lead">
+            这个页面不是简单把一个聊天框丢上来，而是把你在 Coze 里做好的 Agent、工作流、知识库、数据库和卡片交互，用一个更像产品 Demo 的网页壳包起来。
+          </p>
+          <div class="hero-actions">
+            <a class="primary" href="#experience">立即体验</a>
+            <button class="secondary" type="button" id="reset-panel">聊天框回到右侧</button>
+          </div>
+        </div>
+
+        <div class="hero-side">
+          <div class="stat-card">
+            <div class="title">当前演示模式</div>
+            <div class="stat-grid">
+              <div class="stat">
+                <strong>前端</strong>
+                <span>GitHub Pages 托管网页，负责展示和接入 Chat SDK。</span>
+              </div>
+              <div class="stat">
+                <strong>能力</strong>
+                <span>Coze Agent 负责对话、工作流编排、卡片和业务逻辑。</span>
+              </div>
+              <div class="stat">
+                <strong>数据</strong>
+                <span>知识库和数据库继续放在 Coze 侧，当前 Demo 无需自建后端。</span>
+              </div>
+              <div class="stat">
+                <strong>形态</strong>
+                <span>既能在线演示，也方便后续继续包装成作品集项目。</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="info-card" style="padding: 18px 20px;">
+            <div class="title">你现在看到的重点</div>
+            <p class="body">
+              右侧聊天面板保留 Coze 官方 SDK 的原生交互能力，外层容器则由这个网页控制，所以现在可以拖动、复位，也能继续改页面视觉。
+            </p>
+          </div>
+        </div>
       </section>
 
-      <section class="sdk-wrap">
-        <div id="coze-chat-sdk"></div>
+      <section class="main-grid" id="experience">
+        <div class="content">
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <h2 class="panel-title">核心能力</h2>
+                <p class="panel-subtitle">
+                  这不是大而全的介绍页，而是把这个项目最适合展示给老师、面试官和自己复盘的内容挑出来放在一页里。
+                </p>
+              </div>
+              <span class="badge">适合 Demo 展示</span>
+            </div>
+            <div class="cards">
+              <article class="feature">
+                <h3>出差申请</h3>
+                <p>收集出发地、目的地、时间、事由和交通方式，再由工作流完成申请表单落库。</p>
+              </article>
+              <article class="feature">
+                <h3>费用标准匹配</h3>
+                <p>结合城市分类、职级标准和出差时长，估算住宿、市内交通和补贴金额。</p>
+              </article>
+              <article class="feature">
+                <h3>知识库检索</h3>
+                <p>先召回城市、机场、费用项目等候选数据，再由大模型做二次提取和结构化输出。</p>
+              </article>
+              <article class="feature">
+                <h3>卡片交互</h3>
+                <p>把申请信息整理成更清晰的确认视图，减少用户看漏字段、填错字段的概率。</p>
+              </article>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <h2 class="panel-title">现在这套架构怎么理解</h2>
+                <p class="panel-subtitle">
+                  用最直白的话说：网页只是壳，真正的智能体能力主要还在 Coze 云端。
+                </p>
+              </div>
+              <span class="badge">适合讲项目</span>
+            </div>
+            <div class="architecture">
+              <article class="arch-item">
+                <h3>1. 页面层</h3>
+                <p>当前网页负责视觉展示、说明文案、布局结构，以及把聊天窗口放进一个更像产品的界面里。</p>
+              </article>
+              <article class="arch-item">
+                <h3>2. 交互接入层</h3>
+                <p>Chat SDK 相当于桥，把网页和你发布到 Coze 的 Agent 接起来，同时保留卡片、按钮和多轮对话能力。</p>
+              </article>
+              <article class="arch-item">
+                <h3>3. 智能体能力层</h3>
+                <p>意图识别、工作流路由、知识库检索、数据库写入和卡片动作，核心都发生在 Coze 侧。</p>
+              </article>
+              <article class="arch-item">
+                <h3>4. 后续扩展层</h3>
+                <p>如果以后要做更像企业系统的版本，可以把现在这个前端保留，再补一层你自己的后端去做鉴权、日志和业务系统对接。</p>
+              </article>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <h2 class="panel-title">推荐展示流程</h2>
+                <p class="panel-subtitle">
+                  你后面给老师或面试官演示时，可以按这个顺序讲，逻辑会更顺。
+                </p>
+              </div>
+              <span class="badge">适合答辩</span>
+            </div>
+            <div class="steps">
+              <article class="step">
+                <div class="step-index">1</div>
+                <div>
+                  <h3>先讲目标</h3>
+                  <p>这是一个企业商旅费控智能体 Demo，核心目标是把出差申请、标准匹配、差旅信息查询和数据落库串起来。</p>
+                </div>
+              </article>
+              <article class="step">
+                <div class="step-index">2</div>
+                <div>
+                  <h3>再讲 Coze 复刻过程</h3>
+                  <p>说明你是从已有成品出发，自己重新搭建知识库、数据库、工作流、卡片和提示词，而不是只会点几下现成模板。</p>
+                </div>
+              </article>
+              <article class="step">
+                <div class="step-index">3</div>
+                <div>
+                  <h3>最后讲产品化包装</h3>
+                  <p>这个网页就是你把 Agent 从平台内部使用，包装成可以公开演示的外部产品页面的第一步。</p>
+                </div>
+              </article>
+            </div>
+          </section>
+        </div>
+
+        <aside class="assistant-area">
+          <div class="assistant-panel" id="assistant-panel">
+            <div class="assistant-header" id="drag-handle">
+              <div class="assistant-title">
+                <strong>智能体体验区</strong>
+                <span>按住标题栏可以拖动位置</span>
+              </div>
+              <div class="assistant-actions">
+                <button type="button" id="reset-panel-top">复位</button>
+              </div>
+            </div>
+            <div class="assistant-meta">
+              当前接入方式：<span class="inline-code">Coze Chat SDK</span>
+            </div>
+            <div class="sdk-wrap">
+              <div id="coze-chat-sdk"></div>
+            </div>
+            <div class="footer-note">
+              现在保留的是 Coze 官方聊天区，所以内部消息样式、卡片渲染和按钮交互仍然由 Coze 控制。这个网页主要负责把它放进更完整的产品展示壳里。
+            </div>
+          </div>
+        </aside>
       </section>
     </main>
 
     <script src="https://lf-cdn.coze.cn/obj/unpkg/flow-platform/chat-app-sdk/1.2.0-beta.19/libs/cn/index.js"></script>
     <script>
       const mountEl = document.getElementById("coze-chat-sdk");
+      const resetButtons = [
+        document.getElementById("reset-panel"),
+        document.getElementById("reset-panel-top"),
+      ];
+      const panel = document.getElementById("assistant-panel");
+      const dragHandle = document.getElementById("drag-handle");
+      const desktopMedia = window.matchMedia("(min-width: 1121px)");
+
       const sdk = window.CozeWebSDK || window.CozeWebSDKmain;
 
       if (!sdk || !sdk.WebChatClient) {
         mountEl.innerHTML =
-          '<div style="padding:24px;color:#8b4b15;">Chat SDK 加载失败。请打开浏览器控制台检查脚本是否被拦截。</div>';
+          '<div style="padding:24px;color:#8e3f1e;">Chat SDK 加载失败，请检查网络或浏览器控制台。</div>';
         throw new Error("Coze Chat SDK is not available on window.");
       }
 
@@ -132,6 +753,95 @@
       if (chatClient && typeof chatClient.showChatBot === "function") {
         chatClient.showChatBot();
       }
+
+      function resetPanelPosition() {
+        if (!desktopMedia.matches) {
+          panel.style.left = "";
+          panel.style.top = "";
+          panel.style.right = "";
+          return;
+        }
+
+        panel.style.left = "";
+        panel.style.top = "";
+        panel.style.right = "";
+
+        const rect = panel.getBoundingClientRect();
+        const margin = 28;
+        const top = Math.max(margin, 28);
+        const left = Math.max(margin, window.innerWidth - rect.width - margin);
+
+        panel.style.left = left + "px";
+        panel.style.top = top + "px";
+        panel.style.right = "auto";
+      }
+
+      let dragging = false;
+      let offsetX = 0;
+      let offsetY = 0;
+
+      function handlePointerDown(event) {
+        if (!desktopMedia.matches) {
+          return;
+        }
+
+        const rect = panel.getBoundingClientRect();
+        dragging = true;
+        offsetX = event.clientX - rect.left;
+        offsetY = event.clientY - rect.top;
+        dragHandle.classList.add("dragging");
+        panel.style.right = "auto";
+        panel.style.left = rect.left + "px";
+        panel.style.top = rect.top + "px";
+        dragHandle.setPointerCapture(event.pointerId);
+      }
+
+      function handlePointerMove(event) {
+        if (!dragging || !desktopMedia.matches) {
+          return;
+        }
+
+        const margin = 12;
+        const nextLeft = Math.min(
+          Math.max(margin, event.clientX - offsetX),
+          window.innerWidth - panel.offsetWidth - margin
+        );
+        const nextTop = Math.min(
+          Math.max(margin, event.clientY - offsetY),
+          window.innerHeight - panel.offsetHeight - margin
+        );
+
+        panel.style.left = nextLeft + "px";
+        panel.style.top = nextTop + "px";
+      }
+
+      function stopDragging(event) {
+        if (!dragging) {
+          return;
+        }
+
+        dragging = false;
+        dragHandle.classList.remove("dragging");
+        if (event && typeof dragHandle.releasePointerCapture === "function") {
+          try {
+            dragHandle.releasePointerCapture(event.pointerId);
+          } catch (error) {
+            // Ignore pointer release failures.
+          }
+        }
+      }
+
+      dragHandle.addEventListener("pointerdown", handlePointerDown);
+      dragHandle.addEventListener("pointermove", handlePointerMove);
+      dragHandle.addEventListener("pointerup", stopDragging);
+      dragHandle.addEventListener("pointercancel", stopDragging);
+
+      resetButtons.forEach(function (button) {
+        button.addEventListener("click", resetPanelPosition);
+      });
+
+      window.addEventListener("resize", resetPanelPosition);
+      resetPanelPosition();
     </script>
   </body>
-  </html>
+</html>
