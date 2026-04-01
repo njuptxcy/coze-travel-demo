@@ -12,73 +12,226 @@
       body {
         margin: 0;
         min-height: 100vh;
+        overflow: hidden;
         font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
         background:
-          radial-gradient(circle at top left, rgba(255, 188, 137, 0.22), transparent 25%),
+          radial-gradient(circle at top left, rgba(255, 188, 137, 0.24), transparent 26%),
+          radial-gradient(circle at bottom right, rgba(92, 145, 255, 0.16), transparent 22%),
           linear-gradient(180deg, #f7f1e8 0%, #efe8dc 100%);
       }
 
-      #coze-chat-sdk {
-        min-height: 100vh;
+      .workspace {
+        position: relative;
+        width: 100vw;
+        height: 100vh;
       }
 
-      .drag-tip {
+      .chat-window {
+        position: fixed;
+        top: 40px;
+        right: 40px;
+        width: 430px;
+        height: 760px;
+        min-width: 360px;
+        min-height: 520px;
+        max-width: calc(100vw - 24px);
+        max-height: calc(100vh - 24px);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        resize: both;
+        border: 1px solid rgba(28, 31, 39, 0.1);
+        border-radius: 24px;
+        background: rgba(255, 252, 246, 0.9);
+        box-shadow: 0 26px 70px rgba(28, 29, 33, 0.16);
+        backdrop-filter: blur(10px);
+      }
+
+      .chat-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        height: 56px;
+        padding: 0 14px 0 16px;
+        border-bottom: 1px solid rgba(28, 31, 39, 0.08);
+        background: linear-gradient(135deg, rgba(255, 249, 242, 0.96), rgba(243, 248, 255, 0.96));
+        cursor: grab;
+        user-select: none;
+        touch-action: none;
+      }
+
+      .chat-header.dragging {
+        cursor: grabbing;
+      }
+
+      .chat-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+      }
+
+      .chat-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 999px;
+        background: #47a06d;
+        flex: 0 0 auto;
+      }
+
+      .chat-title-text {
+        min-width: 0;
+      }
+
+      .chat-title-text strong {
+        display: block;
+        color: #1f2330;
+        font-size: 15px;
+        line-height: 1.2;
+      }
+
+      .chat-title-text span {
+        display: block;
+        margin-top: 2px;
+        color: #6b6f7b;
+        font-size: 12px;
+        line-height: 1.2;
+      }
+
+      .chat-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex: 0 0 auto;
+      }
+
+      .chat-actions button {
+        appearance: none;
+        border: 1px solid rgba(28, 31, 39, 0.1);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.88);
+        color: #2f3442;
+        padding: 8px 12px;
+        font: inherit;
+        font-size: 12px;
+        cursor: pointer;
+      }
+
+      .chat-body {
+        position: relative;
+        flex: 1;
+        min-height: 0;
+        overflow: hidden;
+        background: rgba(255, 255, 255, 0.76);
+      }
+
+      #coze-chat-sdk {
+        width: 100%;
+        height: 100%;
+      }
+
+      #coze-chat-sdk > * {
+        width: 100% !important;
+        height: 100% !important;
+      }
+
+      .resize-tip {
+        position: absolute;
+        right: 12px;
+        bottom: 10px;
+        z-index: 2;
+        pointer-events: none;
+        color: rgba(79, 83, 94, 0.5);
+        font-size: 11px;
+      }
+
+      .page-tip {
         position: fixed;
         left: 16px;
         bottom: 16px;
-        z-index: 10;
-        max-width: min(320px, calc(100vw - 32px));
+        max-width: min(340px, calc(100vw - 32px));
         padding: 12px 14px;
-        border: 1px solid rgba(34, 35, 40, 0.08);
+        border: 1px solid rgba(28, 31, 39, 0.08);
         border-radius: 16px;
-        color: #594f42;
-        background: rgba(255, 252, 246, 0.86);
-        box-shadow: 0 16px 30px rgba(39, 33, 26, 0.1);
+        color: #5d5447;
+        background: rgba(255, 252, 246, 0.84);
+        box-shadow: 0 14px 34px rgba(35, 31, 26, 0.1);
         font-size: 13px;
         line-height: 1.6;
         backdrop-filter: blur(12px);
       }
 
-      .drag-tip strong {
+      .page-tip strong {
         display: block;
         margin-bottom: 4px;
-        color: #2a241d;
+        color: #28231e;
         font-size: 14px;
       }
 
-      .drag-handle-mark {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: calc(100% - 92px);
-        height: 58px;
-        z-index: 2147483646;
-        cursor: grab;
-        background: transparent;
-        touch-action: none;
-      }
-
-      .drag-handle-mark.dragging {
-        cursor: grabbing;
-      }
-
       @media (max-width: 768px) {
-        .drag-tip {
-          font-size: 12px;
+        body {
+          overflow: auto;
+        }
+
+        .chat-window {
+          position: relative;
+          top: auto;
+          right: auto;
+          width: 100vw;
+          height: 100vh;
+          min-width: 0;
+          min-height: 100vh;
+          max-width: none;
+          max-height: none;
+          border-radius: 0;
+          resize: none;
+        }
+
+        .chat-header {
+          cursor: default;
+        }
+
+        .page-tip {
+          display: none;
         }
       }
     </style>
   </head>
   <body>
-    <div id="coze-chat-sdk"></div>
-    <div class="drag-tip">
-      <strong>当前先只处理拖动</strong>
-      按住聊天框顶部左侧标题区域即可拖动。右上角按钮仍然保留原来的点击功能。
+    <div class="workspace">
+      <section class="chat-window" id="chat-window">
+        <header class="chat-header" id="drag-handle">
+          <div class="chat-title">
+            <span class="chat-dot"></span>
+            <div class="chat-title-text">
+              <strong>商旅费控智能体</strong>
+              <span>现在拖动的是这个真实聊天窗口</span>
+            </div>
+          </div>
+          <div class="chat-actions">
+            <button type="button" id="reset-window">复位</button>
+          </div>
+        </header>
+        <div class="chat-body">
+          <div id="coze-chat-sdk"></div>
+          <div class="resize-tip">右下角可拖动改大小</div>
+        </div>
+      </section>
+    </div>
+
+    <div class="page-tip">
+      <strong>当前模式</strong>
+      这是嵌入式聊天窗口，不再使用右下角浮球弹窗。桌面端可拖动、可改大小。
     </div>
 
     <script src="https://lf-cdn.coze.cn/obj/unpkg/flow-platform/chat-app-sdk/1.2.0-beta.19/libs/cn/index.js"></script>
     <script>
       const mountEl = document.getElementById("coze-chat-sdk");
+      const chatWindow = document.getElementById("chat-window");
+      const dragHandle = document.getElementById("drag-handle");
+      const resetButton = document.getElementById("reset-window");
+      const desktopMedia = window.matchMedia("(min-width: 769px)");
       const sdk = window.CozeWebSDK || window.CozeWebSDKmain;
 
       if (!sdk || !sdk.WebChatClient) {
@@ -87,12 +240,36 @@
         throw new Error("Coze Chat SDK is not available on window.");
       }
 
+      function clamp(value, min, max) {
+        return Math.min(Math.max(value, min), max);
+      }
+
+      function syncEmbeddedRoot() {
+        const firstChild = mountEl.firstElementChild;
+        if (!firstChild) {
+          return;
+        }
+
+        firstChild.style.width = "100%";
+        firstChild.style.height = "100%";
+        firstChild.style.maxWidth = "100%";
+        firstChild.style.maxHeight = "100%";
+      }
+
+      const observer = new MutationObserver(function () {
+        syncEmbeddedRoot();
+      });
+
+      observer.observe(mountEl, {
+        childList: true,
+        subtree: true,
+      });
+
       const chatClient = new sdk.WebChatClient({
         config: {
+          type: "bot",
           bot_id: "7622561335737532470",
-        },
-        componentProps: {
-          title: "商旅费控智能体",
+          isIframe: false,
         },
         auth: {
           type: "token",
@@ -101,175 +278,134 @@
             return "pat_orpMRBmtF3AxM0MemoyRUUiIF4BoN1qVmvRyoKAlOcd4Ci3c0jpv9pE5JnT82H1c";
           },
         },
-        el: mountEl,
+        ui: {
+          base: {
+            layout: "pc",
+            lang: "zh-CN",
+            zIndex: 1000,
+          },
+          header: {
+            isShow: false,
+            isNeedClose: false,
+          },
+          asstBtn: {
+            isNeed: false,
+          },
+          conversations: {
+            isNeed: true,
+          },
+          footer: {
+            isShow: false,
+          },
+          chatBot: {
+            title: "商旅费控智能体",
+            uploadable: true,
+            width: 430,
+            el: mountEl,
+            isNeedAddNewConversation: true,
+            isNeedFunctionCallMessage: true,
+            isNeedQuote: true,
+          },
+        },
       });
 
       if (chatClient && typeof chatClient.showChatBot === "function") {
         chatClient.showChatBot();
       }
 
-      function clamp(value, min, max) {
-        return Math.min(Math.max(value, min), max);
-      }
+      window.setTimeout(syncEmbeddedRoot, 600);
+      window.setTimeout(syncEmbeddedRoot, 1500);
+      window.setTimeout(syncEmbeddedRoot, 3000);
 
-      function getNearestDraggableRoot(marker) {
-        let node = marker;
-
-        while (node && node !== document.body) {
-          const rect = node.getBoundingClientRect();
-          const style = window.getComputedStyle(node);
-          const isLargeEnough = rect.width > 280 && rect.height > 360;
-          const isFloating = style.position === "fixed" || style.position === "absolute";
-
-          if (isLargeEnough && isFloating) {
-            return node;
-          }
-
-          node = node.parentElement;
-        }
-
-        return null;
-      }
-
-      function findSdkPanel() {
-        const allNodes = Array.from(document.querySelectorAll("body *"));
-        const marker = allNodes.find(function (node) {
-          const text = (node.textContent || "").trim();
-          return (
-            text.includes("web_sdk_official_banner") ||
-            text.includes("chatInputPlaceholder") ||
-            text.includes("商旅费控agent")
-          );
-        });
-
-        if (marker) {
-          const root = getNearestDraggableRoot(marker);
-          if (root) {
-            return root;
-          }
-        }
-
-        const floatingCandidates = allNodes.filter(function (node) {
-          const rect = node.getBoundingClientRect();
-          const style = window.getComputedStyle(node);
-          return (
-            (style.position === "fixed" || style.position === "absolute") &&
-            rect.width > 280 &&
-            rect.height > 360 &&
-            rect.top < window.innerHeight &&
-            rect.left < window.innerWidth
-          );
-        });
-
-        floatingCandidates.sort(function (a, b) {
-          const aRect = a.getBoundingClientRect();
-          const bRect = b.getBoundingClientRect();
-          return aRect.width * aRect.height - bRect.width * bRect.height;
-        });
-
-        return floatingCandidates[0] || null;
-      }
-
-      function installDrag(root) {
-        if (!root || root.dataset.dragInstalled === "1") {
+      function resetWindow() {
+        if (!desktopMedia.matches) {
+          chatWindow.style.left = "";
+          chatWindow.style.top = "";
+          chatWindow.style.right = "";
+          chatWindow.style.width = "";
+          chatWindow.style.height = "";
           return;
         }
 
-        root.dataset.dragInstalled = "1";
-
-        const rect = root.getBoundingClientRect();
-        root.style.position = "fixed";
-        root.style.left = clamp(rect.left, 12, window.innerWidth - rect.width - 12) + "px";
-        root.style.top = clamp(rect.top, 12, window.innerHeight - rect.height - 12) + "px";
-        root.style.right = "auto";
-        root.style.bottom = "auto";
-        root.style.margin = "0";
-        root.style.transform = "none";
-        root.style.zIndex = "2147483645";
-
-        const handle = document.createElement("div");
-        handle.className = "drag-handle-mark";
-        root.appendChild(handle);
-
-        let dragging = false;
-        let offsetX = 0;
-        let offsetY = 0;
-
-        function movePanel(clientX, clientY) {
-          const panelWidth = root.offsetWidth;
-          const panelHeight = root.offsetHeight;
-          const nextLeft = clamp(clientX - offsetX, 12, window.innerWidth - panelWidth - 12);
-          const nextTop = clamp(clientY - offsetY, 12, window.innerHeight - panelHeight - 12);
-
-          root.style.left = nextLeft + "px";
-          root.style.top = nextTop + "px";
-        }
-
-        handle.addEventListener("pointerdown", function (event) {
-          const currentRect = root.getBoundingClientRect();
-          dragging = true;
-          offsetX = event.clientX - currentRect.left;
-          offsetY = event.clientY - currentRect.top;
-          handle.classList.add("dragging");
-          handle.setPointerCapture(event.pointerId);
-        });
-
-        handle.addEventListener("pointermove", function (event) {
-          if (!dragging) {
-            return;
-          }
-
-          movePanel(event.clientX, event.clientY);
-        });
-
-        function stopDragging(event) {
-          if (!dragging) {
-            return;
-          }
-
-          dragging = false;
-          handle.classList.remove("dragging");
-
-          if (event && typeof handle.releasePointerCapture === "function") {
-            try {
-              handle.releasePointerCapture(event.pointerId);
-            } catch (error) {
-              // Ignore release failures.
-            }
-          }
-        }
-
-        handle.addEventListener("pointerup", stopDragging);
-        handle.addEventListener("pointercancel", stopDragging);
-
-        window.addEventListener("resize", function () {
-          const currentRect = root.getBoundingClientRect();
-          root.style.left =
-            clamp(currentRect.left, 12, window.innerWidth - root.offsetWidth - 12) + "px";
-          root.style.top =
-            clamp(currentRect.top, 12, window.innerHeight - root.offsetHeight - 12) + "px";
-        });
+        chatWindow.style.width = "430px";
+        chatWindow.style.height = "760px";
+        chatWindow.style.left = "";
+        chatWindow.style.top = "40px";
+        chatWindow.style.right = "40px";
       }
 
-      function tryEnableDragging() {
-        const sdkPanel = findSdkPanel();
-        if (sdkPanel) {
-          installDrag(sdkPanel);
+      let dragging = false;
+      let offsetX = 0;
+      let offsetY = 0;
+
+      function handlePointerDown(event) {
+        if (!desktopMedia.matches) {
+          return;
+        }
+
+        const rect = chatWindow.getBoundingClientRect();
+        dragging = true;
+        offsetX = event.clientX - rect.left;
+        offsetY = event.clientY - rect.top;
+        dragHandle.classList.add("dragging");
+        chatWindow.style.left = rect.left + "px";
+        chatWindow.style.top = rect.top + "px";
+        chatWindow.style.right = "auto";
+        dragHandle.setPointerCapture(event.pointerId);
+      }
+
+      function handlePointerMove(event) {
+        if (!dragging || !desktopMedia.matches) {
+          return;
+        }
+
+        const nextLeft = clamp(event.clientX - offsetX, 12, window.innerWidth - chatWindow.offsetWidth - 12);
+        const nextTop = clamp(event.clientY - offsetY, 12, window.innerHeight - chatWindow.offsetHeight - 12);
+
+        chatWindow.style.left = nextLeft + "px";
+        chatWindow.style.top = nextTop + "px";
+      }
+
+      function stopDragging(event) {
+        if (!dragging) {
+          return;
+        }
+
+        dragging = false;
+        dragHandle.classList.remove("dragging");
+
+        if (event && typeof dragHandle.releasePointerCapture === "function") {
+          try {
+            dragHandle.releasePointerCapture(event.pointerId);
+          } catch (error) {
+            // Ignore release failures.
+          }
         }
       }
 
-      const observer = new MutationObserver(function () {
-        tryEnableDragging();
-      });
+      dragHandle.addEventListener("pointerdown", handlePointerDown);
+      dragHandle.addEventListener("pointermove", handlePointerMove);
+      dragHandle.addEventListener("pointerup", stopDragging);
+      dragHandle.addEventListener("pointercancel", stopDragging);
+      resetButton.addEventListener("click", resetWindow);
 
-      observer.observe(document.body, {
-        childList: true,
-        subtree: true,
-      });
+      window.addEventListener("resize", function () {
+        syncEmbeddedRoot();
 
-      window.setTimeout(tryEnableDragging, 600);
-      window.setTimeout(tryEnableDragging, 1500);
-      window.setTimeout(tryEnableDragging, 3000);
+        if (!desktopMedia.matches) {
+          chatWindow.style.left = "";
+          chatWindow.style.top = "";
+          chatWindow.style.right = "";
+          return;
+        }
+
+        const rect = chatWindow.getBoundingClientRect();
+        chatWindow.style.left =
+          clamp(rect.left, 12, window.innerWidth - chatWindow.offsetWidth - 12) + "px";
+        chatWindow.style.top =
+          clamp(rect.top, 12, window.innerHeight - chatWindow.offsetHeight - 12) + "px";
+        chatWindow.style.right = "auto";
+      });
     </script>
   </body>
 </html>
