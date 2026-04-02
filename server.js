@@ -1,20 +1,32 @@
 import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
 import { extname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = fileURLToPath(new URL(".", import.meta.url));
+import { createTrip, getDbInfo, getTripById, initializeDatabase, listTrips } from "./db.js";
 
 const PORT = Number(process.env.PORT || 3000);
 const COZE_PAT = process.env.COZE_PAT;
 const COZE_BOT_ID = process.env.COZE_BOT_ID || "7622561335737532470";
 const COZE_BASE_URL = "https://api.coze.cn/v3";
-const PUBLIC_DIR = join(__dirname, "public");
+const PUBLIC_DIR = join(process.cwd(), "public");
 
 function sendJson(res, statusCode, data) {
-  res.writeHead(statusCode, { "Content-Type": "application/json; charset=utf-8" });
-  res.end(JSON.stringify(data));
+  res.writeHead(statusCode, {
+    "Content-Type": "application/json; charset=utf-8",
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+  });
+  res.end(JSON.stringify(data, null, 2));
+}
+
+function sendNoContent(res) {
+  res.writeHead(204, {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+  });
+  res.end();
 }
 
 function delay(ms) {
@@ -29,12 +41,23 @@ async function parseJsonBody(req) {
   }
 
   const raw = Buffer.concat(chunks).toString("utf8");
-  return raw ? JSON.parse(raw) : {};
+
+  if (!raw) {
+    return {};
+  }
+
+  try {
+    return JSON.parse(raw);
+  } catch {
+    const error = new Error("Request body must be valid JSON");
+    error.statusCode = 400;
+    throw error;
+  }
 }
 
 async function callCoze(path, options = {}) {
   if (!COZE_PAT) {
-    throw new Error("缺少 COZE_PAT 环境变量。");
+    throw new Error("COZE_PAT is not set");
   }
 
   const response = await fetch(`${COZE_BASE_URL}${path}`, {
@@ -101,13 +124,13 @@ async function waitForChat(chatId, conversationId) {
     }
 
     if (status === "failed" || status === "cancelled") {
-      throw new Error(`聊天任务未完成，当前状态: ${status}`);
+      throw new Error(`Chat task stopped with status: ${status}`);
     }
 
     await delay(2000);
   }
 
-  throw new Error("等待 Coze 回复超时。轮询时间已到，但任务仍未完成。");
+  throw new Error("Timed out while waiting for Coze response");
 }
 
 async function listMessages(chatId, conversationId) {
@@ -124,7 +147,7 @@ function extractAnswer(messages) {
   const lastAnswer = answerMessages[answerMessages.length - 1];
 
   if (!lastAnswer) {
-    return "没有拿到 answer 消息。";
+    return "No answer message returned by Coze";
   }
 
   return typeof lastAnswer.content === "string"
@@ -132,8 +155,12 @@ function extractAnswer(messages) {
     : JSON.stringify(lastAnswer.content, null, 2);
 }
 
-async function serveStatic(req, res) {
-  const url = new URL(req.url, `http://${req.headers.host}`);
+function getTripIdFromPath(pathname) {
+  const match = pathname.match(/^\/api\/trips\/(\d+)$/);
+  return match ? Number(match[1]) : null;
+}
+
+async function serveStatic(res, url) {
   const pathname = url.pathname === "/" ? "/index.html" : url.pathname;
   const filePath = join(PUBLIC_DIR, pathname);
   const ext = extname(filePath);
@@ -158,15 +185,69 @@ async function serveStatic(req, res) {
 }
 
 const server = createServer(async (req, res) => {
+  const url = new URL(req.url, `http://${req.headers.host}`);
+
   try {
-    if (req.method === "POST" && req.url === "/api/chat") {
+    if (req.method === "OPTIONS") {
+      return sendNoContent(res);
+    }
+
+    if (req.method === "GET" && url.pathname === "/api/health") {
+      await initializeDatabase();
+      return sendJson(res, 200, {
+        ok: true,
+        database: getDbInfo(),
+      });
+    }
+
+    if (req.method === "GET" && url.pathname === "/api/trips") {
+      const trips = await listTrips();
+      return sendJson(res, 200, {
+        success: true,
+        count: trips.length,
+        data: trips,
+      });
+    }
+
+    if (req.method === "GET") {
+      const tripId = getTripIdFromPath(url.pathname);
+
+      if (tripId !== null) {
+        const trip = await getTripById(tripId);
+
+        if (!trip) {
+          return sendJson(res, 404, {
+            success: false,
+            error: "Trip not found",
+          });
+        }
+
+        return sendJson(res, 200, {
+          success: true,
+          data: trip,
+        });
+      }
+    }
+
+    if (req.method === "POST" && url.pathname === "/api/trips/apply") {
+      const body = await parseJsonBody(req);
+      const trip = await createTrip(body);
+
+      return sendJson(res, 201, {
+        success: true,
+        message: "Trip application created",
+        data: trip,
+      });
+    }
+
+    if (req.method === "POST" && url.pathname === "/api/chat") {
       const body = await parseJsonBody(req);
       const userMessage = String(body.message || "").trim();
       const userId = String(body.userId || "demo_user_001");
       const conversationId = String(body.conversationId || "").trim();
 
       if (!userMessage) {
-        return sendJson(res, 400, { error: "message 不能为空。" });
+        return sendJson(res, 400, { error: "message is required" });
       }
 
       console.log(`[coze] incoming message, userId=${userId}, conversationId=${conversationId || "new"}`);
@@ -184,10 +265,14 @@ const server = createServer(async (req, res) => {
       });
     }
 
-    return await serveStatic(req, res);
+    return await serveStatic(res, url);
   } catch (error) {
-    return sendJson(res, 500, {
-      error: error instanceof Error ? error.message : "未知错误",
+    const details = Array.isArray(error?.details) ? error.details : undefined;
+    const statusCode = Number.isInteger(error?.statusCode) ? error.statusCode : 500;
+
+    return sendJson(res, statusCode, {
+      error: error instanceof Error ? error.message : "Unknown error",
+      details,
     });
   }
 });
@@ -195,6 +280,7 @@ const server = createServer(async (req, res) => {
 server.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
   console.log(`Using bot_id: ${COZE_BOT_ID}`);
+  console.log(`Database config: ${JSON.stringify(getDbInfo())}`);
   if (!COZE_PAT) {
     console.log("Warning: COZE_PAT is not set.");
   }
